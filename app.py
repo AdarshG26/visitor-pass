@@ -11,8 +11,12 @@ client = MongoClient(os.getenv('MONGO_URI'))
 # print(f"hello this is mongo uri: {client}")
 db = client["visitor_pass"]
 
-
 @app.route("/")
+def test():
+    return redirect(url_for('login'))
+
+
+@app.route("/login")
 def login():
     return render_template("login.html")
 
