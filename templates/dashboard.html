@@ -8,10 +8,12 @@
                    initial-scale=1.0">
     <title>Visitor-Pass</title>
     <link rel="stylesheet" href="{{url_for('static', filename='css/custom/dashboardstyle.css')}}">
-    <link rel="stylesheet" href="responsive.css">
+    <!-- <link rel="stylesheet" href="responsive.css"> -->
 </head>
 
 <body>
+    <h1>Welcome, {{ username }}!</h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
 
     <!-- for header part -->
     <header>
