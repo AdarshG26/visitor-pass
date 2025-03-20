@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from bson import ObjectId       
 import os
+# from service.auth_service import AuthService
+
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -15,6 +17,8 @@ bcrypt = Bcrypt(app)
 client = MongoClient(os.getenv('MONGO_URI'))
 db = client["visitor_pass"]
 
+# instantiate auth service
+# auth_obj= AuthService()
 
 # User Model for login
 class User(UserMixin):
@@ -59,7 +63,7 @@ def register():
             return redirect(url_for("register"))
         
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
+ 
         db.user.insert_one({
             "user_name":user_name, 
             "email":email, 
@@ -94,7 +98,7 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():   
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", username=current_user.username)
 
 
 @app.route("/logout")
