@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from bson import ObjectId       
 import os
+# from service.auth_service import AuthService
+
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -15,6 +17,8 @@ bcrypt = Bcrypt(app)
 client = MongoClient(os.getenv('MONGO_URI'))
 db = client["visitor_pass"]
 
+# instantiate auth service
+# auth_obj= AuthService()
 
 # User Model for login
 class User(UserMixin):
@@ -59,7 +63,7 @@ def register():
             return redirect(url_for("register"))
         
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
+ 
         db.user.insert_one({
             "user_name":user_name, 
             "email":email, 
