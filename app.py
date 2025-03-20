@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from bson import ObjectId       
@@ -94,7 +94,7 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():   
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", username=current_user.username)
 
 
 @app.route("/logout")
