@@ -6,8 +6,11 @@ import os
 def convert_image_to_text(pan):
     # Read the image using OpenCV
     img = cv2.imread(pan)
+    print(f"print the type of img is :{type(img)}")
+    exit
 
     # Check if the image is loaded correctly
+    # The raise keyword is used to raise an exception. You can define what kind of error to raise, and the text to print to the user. 
     if img is None:
         raise ValueError(f"Error: Image not found at path {pan}")
     
