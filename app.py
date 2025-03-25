@@ -4,7 +4,10 @@ from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from bson import ObjectId       
 import os
-# from service.auth_service import AuthService
+import pytesseract
+from PIL import Image
+import cv2
+import re
 
 
 app = Flask(__name__)
@@ -17,8 +20,6 @@ bcrypt = Bcrypt(app)
 client = MongoClient(os.getenv('MONGO_URI'))
 db = client["visitor_pass"]
 
-# instantiate auth service
-# auth_obj= AuthService()
 
 # User Model for login
 class User(UserMixin):
@@ -108,6 +109,110 @@ def logout():
     flash("You have been logout!", "info")
     return redirect(url_for("login"))
 
+
+
+#------------------------------------- code for extracting details from cards and saving to database ----------------------------------------
+
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+def convert_image_to_text(image_path):
+    # Read the image using OpenCV
+    img = cv2.imread(image_path)
+
+    # Check if the image is loaded correctly
+    if img is None:
+        raise ValueError(f"Error: Image not found at path {image_path}")
+    
+    # Convert the image to grayscale (optional, but often helps OCR accuracy)
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Use pytesseract to extract text from the imagesaxs
+    extracted_text = pytesseract.image_to_string(gray_img)
+    return extracted_text
+
+
+def parse_aadhaar_details(text):
+    aadhaar_number = re.search(r"\d{4} \d{4} \d{4}", text)
+    name_match = re.search(r"(?i)(?:Name|नाम):?\s*(.*)", text)
+    dob_match = re.search(r"(?i)(?:DOB|Date\s*of\s*Birth|जन्म\s*तिथि)[^\d]{0,10}(\d{2}/\d{2}/\d{4})", text)
+    gender_match = re.search(r"(?i)(?:Male|Female|Transgender|पुरुष|महिला)", text)
+
+    return {
+        "aadhaar_number": aadhaar_number.group(0) if aadhaar_number else None,
+        "full_name": name_match.group(1) if name_match else None,
+        "dob": dob_match.group(1) if dob_match else None,
+        "gender": gender_match.group(0) if gender_match else None
+    }
+
+
+def parse_pan_details(text):
+    pan_number = re.search(r"[A-Z]{5}[0-9]{4}[A-Z]", text)
+    name_match = re.search(r"(?i)(?:Name|नाम):?\s*(.*)", text)
+    father_match = re.search(r"(?i)(?:Father's Name|पिता का नाम):?\s*(.*)", text)
+    dob_match = re.search(r"(?i)(?:DOB|Date\s*of\s*Birth|जन्म\s*तिथि|जन्म\s*की\s*तारीख)[^\d]{0,10}(\d{2}/\d{2}/\d{4})", text)
+
+
+    return {
+        "pan_number": pan_number.group(0) if pan_number else None,
+        "full_name": name_match.group(1) if name_match else None,
+        "father_name": father_match.group(1) if father_match else None,
+        "dob": dob_match.group(1) if dob_match else None
+    }
+
+
+@app.route("/pan_details", methods=["GET", "POST"])
+def pan_details():
+    pan_img_path = "static/css/imgs/pan.jpg"
+    pan_data = {}
+
+    if os.path.exists(pan_img_path):
+        pan_text = convert_image_to_text(pan_img_path)
+        pan_data = parse_pan_details(pan_text)
+    
+    #----------------- saving extracted data into db ----------------------
+    if request.method == "POST":
+        pan_number = request.form.get("pan_number")
+        full_name = request.form.get("full_name")
+        father_name = request.form.get("father_name")
+        dob = request.form.get("dob")
+
+        db.pan_card_details.insert_one({
+            "pan_number": pan_number,
+            "full_name": full_name,
+            "father_name": father_name,
+            "dob": dob,
+        })
+        return redirect(url_for("aadhaar_details"))
+    
+    return render_template("pan_details.html", pan=pan_data)
+
+
+@app.route("/aadhaar_details", methods=["GET", "POST"])
+def aadhaar_details():
+    aadhaar_img_path = "static/css/imgs/adharcard.jpg"
+    aadhaar_data = {}
+
+    if os.path.exists(aadhaar_img_path):
+        aadhaar_text = convert_image_to_text(aadhaar_img_path)
+        aadhaar_data = parse_aadhaar_details(aadhaar_text)
+        
+    #----------------- saving extracted data into db ----------------------
+    if request.method == "POST":
+        aadhaar_number = request.form.get("aadhaar_number")
+        full_name = request.form.get("full_name")
+        dob = request.form.get("dob")
+        gender = request.form.get("gender")
+
+        db.aadhaar_card_details.insert_one({
+            "aadhaar_number": aadhaar_number,
+            "full_name":full_name, 
+            "dob":dob, 
+            "gender": gender
+        })
+        return redirect(url_for("aadhaar_details"))
+
+    return render_template("aadhaar_details.html", aadhaar=aadhaar_data)
 
 
 if __name__ == "__main__":
