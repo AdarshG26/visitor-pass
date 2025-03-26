@@ -55,6 +55,7 @@ def register():
         cpassword = request.form.get("cpassword")
 
         existing_user = db.user.find_one({"email": email})
+
         if existing_user:
             flash("User already registered!", "danger")
             return redirect(url_for("register"))
@@ -88,18 +89,30 @@ def login():
             user = User(str(user_data["_id"]), user_data["user_name"], user_data["email"], user_data["password"])
             login_user(user)
 
+            role = user_data.get("role","")
+
             flash("Login successful!", "success")
-            return redirect(url_for('dashboard'))
+
+            if role == "admin":
+                return redirect(url_for('security_dashboard'))
+            elif role == "super admin":
+                return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid email or password", "danger")
             
     return render_template("login.html")
 
 
-@app.route("/dashboard")
+@app.route("/security_dashboard")
 @login_required
-def dashboard():   
-    return render_template("dashboard.html", username=current_user.username)
+def security_dashboard():   
+    return render_template("security_dashboard.html", username=current_user.username)
+
+
+@app.route("/admin_dashoard")
+@login_required
+def admin_dashboard():
+    return render_template("admin_dashboard.html")
 
 
 @app.route("/logout")
