@@ -1,7 +1,6 @@
-from flask import Flask, Response, render_template, redirect,url_for, request,send_from_directory
+from flask import Flask, Response, render_template, redirect,send_from_directory
 import cv2
 import os
-import time
 from datetime import datetime
 
 app = Flask(__name__)
@@ -36,7 +35,7 @@ def generate_frames():
 # home page----------------
 @app.route("/")
 def index():            
-    return render_template("index.html")
+    return render_template("open_cam.html")
 
 # capture video feed-----
 @app.route('/video_feed')
@@ -46,7 +45,7 @@ def video_feed():
 # start camera-----------
 @app.route('/open_camera', methods=["POST"])
 def open_camera():
-    return render_template("open_camera.html")
+    return render_template("live_cam_feed.html")
 
 
 # stop camera------
