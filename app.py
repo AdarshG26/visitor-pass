@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, Response, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
@@ -8,6 +8,8 @@ import pytesseract
 from PIL import Image
 import cv2
 import re
+from datetime import datetime
+
 
 
 app = Flask(__name__)
@@ -124,6 +126,80 @@ def logout():
 
 
 
+#---------------------------------------------- Camera Feature ------------------------------------------------------
+
+
+# Define the path to save images
+UPLOAD_FOLDER = os.path.join('static', 'captured_image')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Ensure the directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+image_filename = None  # Store latest captured image filename
+cap=None
+
+# generate_frames-------------
+def generate_frames():
+    global cap
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Open the camera
+
+    while True:
+        success, frame = cap.read()  # Read frames
+        if not success:
+            break
+
+        _, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
+        frame_bytes = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')  # Streaming response format
+
+    cap.release()
+    
+
+# camera page----------------
+@app.route("/camera")
+def camera():            
+    return render_template("open_cam.html")
+
+# capture video feed-------
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# start camera-----------
+@app.route('/open_camera', methods=["POST"])
+def open_camera():
+    return render_template("live_cam_feed.html")
+
+
+# stop camera------
+@app.route("/stop_camera", methods=["GET","POST"])
+def stop_camera():
+    cap.release()
+    cv2.destroyAllWindows()
+    return redirect("security_dashboard")
+
+# Capture Image (Stores it in memory)
+@app.route('/capture')
+def capture():
+    global captured_frame
+    success, frame = cap.read()
+    if success:
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"captured_image_{current_time}.jpg"
+        img_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)    
+        # Save the image using OpenCV
+        cv2.imwrite(img_path, frame)
+        return filename 
+        
+    return "Error capturing image", 500
+
+@app.route('/static/<filename>')
+def get_image(filename):
+    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), filename)  
+
+
+
 #------------------------------------- code for extracting details from cards and saving to database ----------------------------------------
 
 
@@ -174,33 +250,6 @@ def parse_pan_details(text):
     }
 
 
-@app.route("/pan_details", methods=["GET", "POST"])
-def pan_details():
-    pan_img_path = "static/css/imgs/pan.jpg"
-    pan_data = {}
-
-    if os.path.exists(pan_img_path):
-        pan_text = convert_image_to_text(pan_img_path)
-        pan_data = parse_pan_details(pan_text)
-    
-    #----------------- saving extracted data into db ----------------------
-    if request.method == "POST":
-        pan_number = request.form.get("pan_number")
-        full_name = request.form.get("full_name")
-        father_name = request.form.get("father_name")
-        dob = request.form.get("dob")
-
-        db.pan_card_details.insert_one({
-            "pan_number": pan_number,
-            "full_name": full_name,
-            "father_name": father_name,
-            "dob": dob,
-        })
-        return redirect(url_for("aadhaar_details"))
-    
-    return render_template("pan_details.html", pan=pan_data)
-
-
 @app.route("/aadhaar_details", methods=["GET", "POST"])
 def aadhaar_details():
     aadhaar_img_path = "static/css/imgs/adharcard.jpg"
@@ -226,6 +275,32 @@ def aadhaar_details():
         return redirect(url_for("aadhaar_details"))
 
     return render_template("aadhaar_details.html", aadhaar=aadhaar_data)
+
+@app.route("/pan_details", methods=["GET", "POST"])
+def pan_details():
+    pan_img_path = "static/css/imgs/pan.jpg"
+    pan_data = {}
+
+    if os.path.exists(pan_img_path):
+        pan_text = convert_image_to_text(pan_img_path)
+        pan_data = parse_pan_details(pan_text)
+    
+    #----------------- saving extracted data into db ----------------------
+    if request.method == "POST":
+        pan_number = request.form.get("pan_number")
+        full_name = request.form.get("full_name")
+        father_name = request.form.get("father_name")
+        dob = request.form.get("dob")
+
+        db.pan_card_details.insert_one({
+            "pan_number": pan_number,
+            "full_name": full_name,
+            "father_name": father_name,
+            "dob": dob,
+        })
+        return redirect(url_for("aadhaar_details"))
+    
+    return render_template("pan_details.html", pan=pan_data)
 
 
 if __name__ == "__main__":
