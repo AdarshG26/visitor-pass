@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, Response, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from bson import ObjectId       
 import os
-# from service.auth_service import AuthService
+import pytesseract
+from PIL import Image
+import cv2
+import re
+from datetime import datetime
+
 
 
 app = Flask(__name__)
@@ -17,8 +22,6 @@ bcrypt = Bcrypt(app)
 client = MongoClient(os.getenv('MONGO_URI'))
 db = client["visitor_pass"]
 
-# instantiate auth service
-# auth_obj= AuthService()
 
 # User Model for login
 class User(UserMixin):
@@ -54,6 +57,7 @@ def register():
         cpassword = request.form.get("cpassword")
 
         existing_user = db.user.find_one({"email": email})
+
         if existing_user:
             flash("User already registered!", "danger")
             return redirect(url_for("register"))
@@ -87,18 +91,30 @@ def login():
             user = User(str(user_data["_id"]), user_data["user_name"], user_data["email"], user_data["password"])
             login_user(user)
 
+            role = user_data.get("role","")
+
             flash("Login successful!", "success")
-            return redirect(url_for('dashboard'))
+
+            if role == "admin":
+                return redirect(url_for('security_dashboard'))
+            elif role == "super admin":
+                return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid email or password", "danger")
             
     return render_template("login.html")
 
 
-@app.route("/dashboard")
+@app.route("/security_dashboard")
 @login_required
-def dashboard():   
-    return render_template("dashboard.html", username=current_user.username)
+def security_dashboard():   
+    return render_template("security_dashboard.html", username=current_user.username)
+
+
+@app.route("/admin_dashoard")
+@login_required
+def admin_dashboard():
+    return render_template("admin_dashboard.html")
 
 
 @app.route("/logout")
@@ -108,6 +124,183 @@ def logout():
     flash("You have been logout!", "info")
     return redirect(url_for("login"))
 
+
+
+#---------------------------------------------- Camera Feature ------------------------------------------------------
+
+
+# Define the path to save images
+UPLOAD_FOLDER = os.path.join('static', 'captured_image')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Ensure the directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+image_filename = None  # Store latest captured image filename
+cap=None
+
+# generate_frames-------------
+def generate_frames():
+    global cap
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Open the camera
+
+    while True:
+        success, frame = cap.read()  # Read frames
+        if not success:
+            break
+
+        _, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
+        frame_bytes = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')  # Streaming response format
+
+    cap.release()
+    
+
+# camera page----------------
+@app.route("/camera")
+def camera():            
+    return render_template("open_cam.html")
+
+# capture video feed-------
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# start camera-----------
+@app.route('/open_camera', methods=["POST"])
+def open_camera():
+    return render_template("live_cam_feed.html")
+
+
+# stop camera------
+@app.route("/stop_camera", methods=["GET","POST"])
+def stop_camera():
+    cap.release()
+    cv2.destroyAllWindows()
+    return redirect("security_dashboard")
+
+# Capture Image (Stores it in memory)
+@app.route('/capture')
+def capture():
+    global captured_frame
+    success, frame = cap.read()
+    if success:
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"captured_image_{current_time}.jpg"
+        img_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)    
+        # Save the image using OpenCV
+        cv2.imwrite(img_path, frame)
+        return filename 
+        
+    return "Error capturing image", 500
+
+@app.route('/static/<filename>')
+def get_image(filename):
+    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), filename)  
+
+
+
+#------------------------------------- code for extracting details from cards and saving to database ----------------------------------------
+
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+def convert_image_to_text(image_path):
+    # Read the image using OpenCV
+    img = cv2.imread(image_path)
+
+    # Check if the image is loaded correctly
+    if img is None:
+        raise ValueError(f"Error: Image not found at path {image_path}")
+    
+    # Convert the image to grayscale (optional, but often helps OCR accuracy)
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Use pytesseract to extract text from the imagesaxs
+    extracted_text = pytesseract.image_to_string(gray_img)
+    return extracted_text
+
+
+def parse_aadhaar_details(text):
+    aadhaar_number = re.search(r"\d{4} \d{4} \d{4}", text)
+    name_match = re.search(r"(?i)(?:Name|नाम):?\s*(.*)", text)
+    dob_match = re.search(r"(?i)(?:DOB|Date\s*of\s*Birth|जन्म\s*तिथि)[^\d]{0,10}(\d{2}/\d{2}/\d{4})", text)
+    gender_match = re.search(r"(?i)(?:Male|Female|Transgender|पुरुष|महिला)", text)
+
+    return {
+        "aadhaar_number": aadhaar_number.group(0) if aadhaar_number else None,
+        "full_name": name_match.group(1) if name_match else None,
+        "dob": dob_match.group(1) if dob_match else None,
+        "gender": gender_match.group(0) if gender_match else None
+    }
+
+
+def parse_pan_details(text):
+    pan_number = re.search(r"[A-Z]{5}[0-9]{4}[A-Z]", text)
+    name_match = re.search(r"(?i)(?:Name|नाम):?\s*(.*)", text)
+    father_match = re.search(r"(?i)(?:Father's Name|पिता का नाम):?\s*(.*)", text)
+    dob_match = re.search(r"(?i)(?:DOB|Date\s*of\s*Birth|जन्म\s*तिथि|जन्म\s*की\s*तारीख)[^\d]{0,10}(\d{2}/\d{2}/\d{4})", text)
+
+
+    return {
+        "pan_number": pan_number.group(0) if pan_number else None,
+        "full_name": name_match.group(1) if name_match else None,
+        "father_name": father_match.group(1) if father_match else None,
+        "dob": dob_match.group(1) if dob_match else None
+    }
+
+
+@app.route("/aadhaar_details", methods=["GET", "POST"])
+def aadhaar_details():
+    aadhaar_img_path = "static/css/imgs/adharcard.jpg"
+    aadhaar_data = {}
+
+    if os.path.exists(aadhaar_img_path):
+        aadhaar_text = convert_image_to_text(aadhaar_img_path)
+        aadhaar_data = parse_aadhaar_details(aadhaar_text)
+        
+    #----------------- saving extracted data into db ----------------------
+    if request.method == "POST":
+        aadhaar_number = request.form.get("aadhaar_number")
+        full_name = request.form.get("full_name")
+        dob = request.form.get("dob")
+        gender = request.form.get("gender")
+
+        db.aadhaar_card_details.insert_one({
+            "aadhaar_number": aadhaar_number,
+            "full_name":full_name, 
+            "dob":dob, 
+            "gender": gender
+        })
+        return redirect(url_for("aadhaar_details"))
+
+    return render_template("aadhaar_details.html", aadhaar=aadhaar_data)
+
+@app.route("/pan_details", methods=["GET", "POST"])
+def pan_details():
+    pan_img_path = "static/css/imgs/pan.jpg"
+    pan_data = {}
+
+    if os.path.exists(pan_img_path):
+        pan_text = convert_image_to_text(pan_img_path)
+        pan_data = parse_pan_details(pan_text)
+    
+    #----------------- saving extracted data into db ----------------------
+    if request.method == "POST":
+        pan_number = request.form.get("pan_number")
+        full_name = request.form.get("full_name")
+        father_name = request.form.get("father_name")
+        dob = request.form.get("dob")
+
+        db.pan_card_details.insert_one({
+            "pan_number": pan_number,
+            "full_name": full_name,
+            "father_name": father_name,
+            "dob": dob,
+        })
+        return redirect(url_for("aadhaar_details"))
+    
+    return render_template("pan_details.html", pan=pan_data)
 
 
 if __name__ == "__main__":
