@@ -69,7 +69,8 @@ header {
     gap: 60px;
 }
 
-.searchbar input {
+
+/* .searchbar input {
     width: 250px;
     height: 42px;
     border-radius: 50px 0 0 50px;
@@ -89,7 +90,7 @@ header {
     border-radius: 0px 50px 50px 0px;
     background-color: var(--secondary-color);
     cursor: pointer;
-}
+} */
 
 .message {
     gap: 40px;
@@ -126,7 +127,8 @@ header {
     z-index: 1;
 }
 
-.dpicn {
+
+/* .dpicn {
     height: 50px;
 }
 
@@ -140,8 +142,10 @@ header {
 
 .main::-webkit-scrollbar-thumb {
     background-image: linear-gradient(to bottom, rgb(0, 0, 85), rgb(0, 0, 50));
-}
+} */
 
+
+/* 
 .main::-webkit-scrollbar {
     width: 5px;
 }
@@ -156,7 +160,7 @@ header {
     align-items: center;
     flex-wrap: wrap;
     gap: 50px;
-}
+} */
 
 .nav {
     min-height: 91vh;
@@ -172,7 +176,8 @@ header {
     overflow: hidden;
     padding: 30px 0 20px 10px;
 }
-a{
+
+a {
     text-decoration: none;
 }
 
@@ -232,7 +237,8 @@ a{
     background-color: var(--Border-color);
 }
 
-.box {
+
+/* .box {
     height: 130px;
     width: 230px;
     border-radius: 20px;
@@ -282,7 +288,7 @@ a{
 .topic-heading {
     font-size: 15px;
     letter-spacing: 3px;
-}
+} */
 
 .report-container {
     min-height: 300px;
@@ -333,6 +339,7 @@ a{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
 }
 
 .t-op {
@@ -358,16 +365,28 @@ a{
 .label-tag {
     width: 100px;
     text-align: center;
-    background-color: rgb(0, 177, 0);
+    background-color: #5500cb;
     color: white;
     border-radius: 4px;
+}
+
+.over {
+    text-align: center;
+}
+
+.raj {
+    text-align: center;
+    margin-top: 150px;
 }
 
 
 /* Responsive CSS Here */
 
-@media screen and (max-width: 950px) {
-    .nav-img {
+
+/* @media screen and (max-width: 950px) { */
+
+*/
+/* .nav-img {
         height: 25px;
     }
     .nav-option {
@@ -380,11 +399,17 @@ a{
     .item1,
     .items {
         width: 800px;
-    }
-}
+        line-height: 3;
+    } */
 
-@media screen and (max-width: 850px) {
-    .nav-img {
+
+/* } */
+
+
+/* @media screen and (max-width: 850px) { */
+
+
+/* .nav-img {
         height: 30px;
     }
     .nav-option {
@@ -433,9 +458,10 @@ a{
         font-size: 15px;
         border: 2px solid var(--secondary-color);
     }
-}
+} */
 
-@media screen and (max-width: 490px) {
+
+/* @media screen and (max-width: 490px) {
     .message {
         display: none;
     }
@@ -469,25 +495,32 @@ a{
     .items {
         width: 550px;
     }
+} */
+
+
+/* @media screen and (max-width: 400px) { */
+
+.recent-Articles {
+    font-size: 17px;
 }
 
-@media screen and (max-width: 400px) {
-    .recent-Articles {
-        font-size: 17px;
-    }
-    .view {
-        width: 60px;
-        font-size: 10px;
-        height: 27px;
-    }
-    .report-header {
-        height: 60px;
-        padding: 10px 10px 5px 10px;
-    }
-    .searchbtn img {
-        height: 20px;
-    }
+.view {
+    width: 60px;
+    font-size: 10px;
+    height: 27px;
 }
+
+.report-header {
+    height: 60px;
+    padding: 10px 10px 5px 10px;
+}
+
+.searchbtn img {
+    height: 20px;
+}
+
+
+/* } */
 
 @media screen and (max-width: 320px) {
     .recent-Articles {
@@ -525,4 +558,21 @@ a{
     .searchbar2 input {
         width: 180px;
     }
+}
+
+.btn {
+    background-color: green;
+    border-radius: 5px;
+    width: 80px;
+    height: 40px;
+    margin-left: 750px;
+    margin-right: 20px;
+
+}
+
+.btn1 {
+    background-color: red;
+    border-radius: 5px;
+    width: 80px;
+    height: 40px;
 }

@@ -1,11 +1,11 @@
-/* Main CSS Here */
+i,/* Main CSS Here */
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
+    font-family: "Arial",cursive;
 }
 
 :root {
@@ -69,7 +69,8 @@ header {
     gap: 60px;
 }
 
-.searchbar input {
+
+/* .searchbar input {
     width: 250px;
     height: 42px;
     border-radius: 50px 0 0 50px;
@@ -89,7 +90,7 @@ header {
     border-radius: 0px 50px 50px 0px;
     background-color: var(--secondary-color);
     cursor: pointer;
-}
+} */
 
 .message {
     gap: 40px;
@@ -126,7 +127,8 @@ header {
     z-index: 1;
 }
 
-.dpicn {
+
+/* .dpicn {
     height: 50px;
 }
 
@@ -140,8 +142,10 @@ header {
 
 .main::-webkit-scrollbar-thumb {
     background-image: linear-gradient(to bottom, rgb(0, 0, 85), rgb(0, 0, 50));
-}
+} */
 
+
+/* 
 .main::-webkit-scrollbar {
     width: 5px;
 }
@@ -156,7 +160,7 @@ header {
     align-items: center;
     flex-wrap: wrap;
     gap: 50px;
-}
+} */
 
 .nav {
     min-height: 91vh;
@@ -172,8 +176,13 @@ header {
     overflow: hidden;
     padding: 30px 0 20px 10px;
 }
-a{
+
+a {
     text-decoration: none;
+    font-size: 18px;
+    font-weight: 600px;
+    color: #3f0097;
+    font-family: "Poppins", sans-serif;
 }
 
 .navcontainer {
@@ -232,62 +241,13 @@ a{
     background-color: var(--Border-color);
 }
 
-.box {
-    height: 130px;
-    width: 230px;
-    border-radius: 20px;
-    box-shadow: 3px 3px 10px rgba(0, 30, 87, 0.751);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out;
-}
 
-.box:hover {
-    transform: scale(1.08);
-}
 
-.box:nth-child(1) {
-    background-color: var(--one-use-color);
-}
-
-.box:nth-child(2) {
-    background-color: var(--two-use-color);
-}
-
-.box:nth-child(3) {
-    background-color: var(--one-use-color);
-}
-
-.box:nth-child(4) {
-    background-color: var(--two-use-color);
-}
-
-.box img {
-    height: 60px;
-}
-
-.box .text {
-    color: white;
-}
-
-.topic {
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.topic-heading {
-    font-size: 15px;
-    letter-spacing: 3px;
-}
 
 .report-container {
     min-height: 300px;
-    max-width: 1200px;
-    margin: 70px auto 0px auto;
+    max-width: 950px;
+    margin: 10px auto;
     background-color: #ffffff;
     border-radius: 30px;
     box-shadow: 3px 3px 10px rgb(188, 188, 188);
@@ -333,6 +293,7 @@ a{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
 }
 
 .t-op {
@@ -358,136 +319,45 @@ a{
 .label-tag {
     width: 100px;
     text-align: center;
-    background-color: rgb(0, 177, 0);
+    background-color: #5500cb;
     color: white;
     border-radius: 4px;
 }
 
-
-/* Responsive CSS Here */
-
-@media screen and (max-width: 950px) {
-    .nav-img {
-        height: 25px;
-    }
-    .nav-option {
-        gap: 30px;
-    }
-    .nav-option h3 {
-        font-size: 15px;
-    }
-    .report-topic-heading,
-    .item1,
-    .items {
-        width: 800px;
-    }
+.over {
+    text-align: center;
 }
 
-@media screen and (max-width: 850px) {
-    .nav-img {
-        height: 30px;
-    }
-    .nav-option {
-        gap: 30px;
-    }
-    .nav-option h3 {
-        font-size: 20px;
-    }
-    .report-topic-heading,
-    .item1,
-    .items {
-        width: 700px;
-    }
-    .navcontainer {
-        width: 100vw;
-        position: absolute;
-        transition: all 0.6s ease-in-out;
-        top: 0;
-        left: -100vw;
-    }
-    .nav {
-        width: 100%;
-        position: absolute;
-    }
-    .navclose {
-        left: 00px;
-    }
-    .searchbar {
-        display: none;
-    }
-    .main {
-        padding: 40px 30px 30px 30px;
-    }
-    .searchbar2 {
-        width: 100%;
-        display: flex;
-        margin: 0 0 40px 0;
-        justify-content: center;
-    }
-    .searchbar2 input {
-        width: 250px;
-        height: 42px;
-        border-radius: 50px 0 0 50px;
-        background-color: var(--background-color3);
-        padding: 0 20px;
-        font-size: 15px;
-        border: 2px solid var(--secondary-color);
-    }
+.raj {
+    text-align: center;
+    margin-top: 150px;
 }
 
-@media screen and (max-width: 490px) {
-    .message {
-        display: none;
-    }
-    .logosec {
-        width: 100%;
-        justify-content: space-between;
-    }
-    .logo {
-        font-size: 20px;
-    }
-    .menuicn {
-        height: 25px;
-    }
-    .nav-img {
-        height: 25px;
-    }
-    .nav-option {
-        gap: 25px;
-    }
-    .nav-option h3 {
-        font-size: 12px;
-    }
-    .nav-upper-options {
-        gap: 15px;
-    }
-    .recent-Articles {
-        font-size: 20px;
-    }
-    .report-topic-heading,
-    .item1,
-    .items {
-        width: 550px;
-    }
+
+
+
+
+.recent-Articles {
+    font-size: 17px;
 }
 
-@media screen and (max-width: 400px) {
-    .recent-Articles {
-        font-size: 17px;
-    }
-    .view {
-        width: 60px;
-        font-size: 10px;
-        height: 27px;
-    }
-    .report-header {
-        height: 60px;
-        padding: 10px 10px 5px 10px;
-    }
-    .searchbtn img {
-        height: 20px;
-    }
+.view {
+    width: 60px;
+    font-size: 10px;
+    height: 27px;
 }
+
+.report-header {
+    height: 60px;
+    padding: 10px 10px 5px 10px;
+}
+
+.searchbtn img {
+    height: 20px;
+}
+
+
+/* } */
 
 @media screen and (max-width: 320px) {
     .recent-Articles {
@@ -525,4 +395,34 @@ a{
     .searchbar2 input {
         width: 180px;
     }
+}
+
+.btn {
+    background-color: green;
+    border-radius: 5px;
+    width: 80px;
+    height: 40px;
+    margin-left: 700px;
+    margin-right: 30px;
+}
+
+.btn1 {
+    background-color: red;
+    border-radius: 5px;
+    width: 80px;
+    height: 40px;
+}
+.form{
+    width: 300px;
+
+}
+.form,input{
+   padding-left: 20px;
+}
+.txt{
+    width: 250px;
+}
+.txtb{
+    background-color: #5500cb;
+    color: white;
 }
