@@ -201,7 +201,7 @@ def get_image(filename):
 
 
 
-#------------------------------------- code for extracting details from cards and saving to database ----------------------------------------
+#------------------------------------ code for extracting details from cards and saving to database --------------------------------------
 
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -338,7 +338,7 @@ def pan_details():
     return render_template("pan_details.html", pan=pan_data)
 
 
-#----------------------------------------- Dashboard Routes and logics -----------------------------------------
+#------------------------------------------------ Dashboard Routes and logics -----------------------------------------------
 
 
 @app.route("/home_dash")
