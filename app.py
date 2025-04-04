@@ -92,30 +92,30 @@ def login():
             user = User(str(user_data["_id"]), user_data["user_name"], user_data["email"], user_data["password"])
             login_user(user)
 
-            role = user_data.get("role","")
+            # role = user_data.get("role","")
 
-            flash("Login successful!", "success")
+            return redirect(url_for("home_dash"))
 
-            if role == "admin":
-                return redirect(url_for('security_dashboard'))
-            elif role == "super admin":
-                return redirect(url_for('admin_dashboard'))
+            # if role == "admin":
+            #     return redirect(url_for('security_dashboard'))
+            # elif role == "super admin":
+            #     return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid email or password", "danger")
             
     return render_template("login.html")
 
 
-@app.route("/security_dashboard")
-@login_required
-def security_dashboard():   
-    return render_template("security_dashboard.html", username=current_user.username)
+# @app.route("/security_dashboard")
+# @login_required
+# def security_dashboard():   
+#     return render_template("security_dashboard.html", username=current_user.username)
 
 
-@app.route("/admin_dashoard")
-@login_required
-def admin_dashboard():
-    return render_template("admin_dashboard.html")
+# @app.route("/admin_dashoard")
+# @login_required
+# def admin_dashboard():
+#     return render_template("admin_dashboard.html")
 
 
 @app.route("/logout")
@@ -336,6 +336,24 @@ def pan_details():
         return redirect(url_for("aadhaar_details"))
     
     return render_template("pan_details.html", pan=pan_data)
+
+
+#----------------------------------------- Dashboard Routes -----------------------------------------
+
+@app.route("/home_dash")
+@login_required
+def home_dash():
+    return render_template("home_dashboard.html")
+
+@app.route("/visitorOverview_dash")
+@login_required
+def visitorOverview_dash():
+    return render_template("visitorOverview_dashboard.html")
+
+@app.route("/userOverview_dash")
+@login_required
+def userOverview_dash():
+    return render_template("userOverview_dashboard.html")
 
 
 if __name__ == "__main__":
