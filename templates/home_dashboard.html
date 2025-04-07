@@ -5,76 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/custom/dashboard.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            scroll-behavior: smooth;
-        
-        }
-        .wrapper {
-            display: flex;
-            flex-grow: 1;
-            min-height: 100vh;
-            width: 100%;
-           position: fixed;
-        }
-        .sidebar {
-            width: 250px;
-            transition: width 0.3s;
-            background-color: #343a40;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar .nav-link {
-            display: flex;
-            align-items: center;
-        }
-        .sidebar.collapsed .nav-link span {
-            display: none;
-        }
-        .sidebar .nav-link i {
-            margin-right: 10px;
-        }
-        .sidebar.collapsed .nav-link i {
-            margin-right: 0;
-        }
-        .main-content {
-            flex-grow: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            
-           
-        }
-       
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 80px;
-            }
-            .sidebar .nav-link span {
-                display: none;
-            }
-            
-            
-        }
-        #scroll-box {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            border: 1px solid #ccc;
-            /* padding: 10px; */
-        }
-    </style>
 </head>
 <body>
     <!-- Wrapper for Sidebar and Content -->
@@ -85,12 +18,20 @@
                 <li class="nav-item">
                     <a href="{{ url_for('home_dash') }}" class="nav-link text-white"><i class="fa fa-home"></i><span>Home</span></a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-user"></i> <span>User Overview</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="userDropdown" style="position: static; float: none;">
+                      <li><a class="dropdown-item" href="{{ url_for('all_visitor') }}">All Visitor</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('accepted_visitor') }}">Accepted Visitor</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('rejected_visitor') }}">Rejected Visitors</a></li>
+                    </ul>
+                  </li>
                 <!-- <li class="nav-item">
-                    <a href="{{ url_for('visitorOverview_dash') }}" class="nav-link text-white"><i class="fa fa-address-book"></i> <span>Visitor Overview</span></a>
-                </li> -->
-                <li class="nav-item">
                      <a href="{{ url_for('userOverview_dash') }}" class="nav-link text-white"><i class="fa fa-user"></i> <span>User Overview</span></a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a href="{{ url_for('camera') }}" class="nav-link text-white"><i class="fa fa-camera"></i> <span>Camera</span></a>
                </li>
