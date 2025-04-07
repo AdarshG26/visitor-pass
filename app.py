@@ -363,16 +363,34 @@ def home_dash():
     return render_template("home_dashboard.html")
 
 
-@app.route("/visitorOverview_dash")
-@login_required
-def visitorOverview_dash():
-    return render_template("visitorOverview_dashboard.html")
+# @app.route("/visitorOverview_dash")
+# @login_required
+# def visitorOverview_dash():
+#     return render_template("visitorOverview_dashboard.html")
 
 
 @app.route("/userOverview_dash")
 @login_required
 def userOverview_dash():
     return render_template("userOverview_dashboard.html")
+
+
+@app.route("/all_visitor")
+@login_required
+def all_visitor():
+    return render_template("ALL_VISITOR.html")
+
+
+@app.route("/accepted_visitor")
+@login_required
+def accepted_visitor():
+    return render_template("ACCEPTED_VISITOR.html")
+
+
+@app.route("/rejected_visitor")
+@login_required
+def rejected_visitor():
+    return render_template("REJECTED_VISITOR.html")
 
 
 
