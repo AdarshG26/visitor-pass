@@ -9,6 +9,7 @@ from PIL import Image
 import cv2
 import re
 from datetime import datetime
+import time
 
 
 
@@ -130,7 +131,7 @@ def logout():
 
 
 # Define the path to save images
-UPLOAD_FOLDER = os.path.join('static', 'captured_image')
+UPLOAD_FOLDER = os.path.join('static', 'captured_images')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure the directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -177,7 +178,7 @@ def open_camera():
 def stop_camera():
     cap.release()
     cv2.destroyAllWindows()
-    return redirect("security_dashboard")
+    return redirect("extract_details")
 
 # Capture Image (Stores it in memory)
 @app.route('/capture')
@@ -213,7 +214,7 @@ def convert_image_to_text(image_path):
     if img is None:
         raise ValueError(f"Error: Image not found at path {image_path}")
     
-    # Convert the image to grayscale (optional, but often helps OCR accuracy)
+    # Convert image to grayscale for better OCR accuracy
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Use pytesseract to extract text from the imagesaxs
@@ -250,14 +251,43 @@ def parse_pan_details(text):
     }
 
 
+@app.route("/extract_details", methods=["GET", "POST"])
+def extract_details():
+    img_path = "static/captured_images"
+
+    if os.path.exists(img_path):
+        image_files = [os.path.join(img_path, f) for f in os.listdir(img_path) if f.lower().endswith(('.jpg'))]
+        
+        if image_files:
+            latest_image = max(image_files, key=os.path.getmtime)
+            extracted_text = convert_image_to_text(latest_image)
+
+            if not extracted_text:
+                return "No text detected. Try again with a clearer image.", 400
+
+            aadhaar_number = re.search(r"\d{4} \d{4} \d{4}", extracted_text)
+            pan_number = re.search(r"[A-Z]{5}[0-9]{4}[A-Z]", extracted_text)
+            
+            if aadhaar_number:
+                return redirect(url_for("aadhaar_details"))
+            elif pan_number:
+                return redirect(url_for("pan_details"))
+            
+    return "Document type could not be determined.", 400
+
 @app.route("/aadhaar_details", methods=["GET", "POST"])
 def aadhaar_details():
-    aadhaar_img_path = "static/css/imgs/adharcard.jpg"
+    aadhaar_img_path = "static/captured_images"
     aadhaar_data = {}
 
     if os.path.exists(aadhaar_img_path):
-        aadhaar_text = convert_image_to_text(aadhaar_img_path)
-        aadhaar_data = parse_aadhaar_details(aadhaar_text)
+        image_files = [os.path.join(aadhaar_img_path, f) for f in os.listdir(aadhaar_img_path) if f.lower().endswith(('.jpg'))]
+
+        if image_files:
+            latest_image = max(image_files, key=os.path.getmtime)  # Get the most recently modified image
+                
+            aadhaar_text = convert_image_to_text(latest_image)
+            aadhaar_data = parse_aadhaar_details(aadhaar_text)
         
     #----------------- saving extracted data into db ----------------------
     if request.method == "POST":
@@ -272,18 +302,23 @@ def aadhaar_details():
             "dob":dob, 
             "gender": gender
         })
-        return redirect(url_for("aadhaar_details"))
+        return redirect(url_for("security_dashboard"))
 
     return render_template("aadhaar_details.html", aadhaar=aadhaar_data)
 
+
 @app.route("/pan_details", methods=["GET", "POST"])
 def pan_details():
-    pan_img_path = "static/css/imgs/pan.jpg"
+    pan_img_path = "static/captured_images"
     pan_data = {}
 
     if os.path.exists(pan_img_path):
-        pan_text = convert_image_to_text(pan_img_path)
-        pan_data = parse_pan_details(pan_text)
+        image_files = [os.path.join(pan_img_path, f) for f in os.listdir(pan_img_path) if f.lower().endswith(('.jpg'))]
+
+        if image_files:
+            latest_image = max(image_files, key=os.path.getmtime)  # Get the most recently modified image
+            pan_text = convert_image_to_text(latest_image)
+            pan_data = parse_pan_details(pan_text)
     
     #----------------- saving extracted data into db ----------------------
     if request.method == "POST":
