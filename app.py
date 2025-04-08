@@ -92,30 +92,30 @@ def login():
             user = User(str(user_data["_id"]), user_data["user_name"], user_data["email"], user_data["password"])
             login_user(user)
 
-            role = user_data.get("role","")
+            # role = user_data.get("role","")
 
-            flash("Login successful!", "success")
+            return redirect(url_for("home_dash"))
 
-            if role == "admin":
-                return redirect(url_for('security_dashboard'))
-            elif role == "super admin":
-                return redirect(url_for('admin_dashboard'))
+            # if role == "admin":
+            #     return redirect(url_for('security_dashboard'))
+            # elif role == "super admin":
+            #     return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid email or password", "danger")
             
     return render_template("login.html")
 
 
-@app.route("/security_dashboard")
-@login_required
-def security_dashboard():   
-    return render_template("security_dashboard.html", username=current_user.username)
+# @app.route("/security_dashboard")
+# @login_required
+# def security_dashboard():   
+#     return render_template("security_dashboard.html", username=current_user.username)
 
 
-@app.route("/admin_dashoard")
-@login_required
-def admin_dashboard():
-    return render_template("admin_dashboard.html")
+# @app.route("/admin_dashoard")
+# @login_required
+# def admin_dashboard():
+#     return render_template("admin_dashboard.html")
 
 
 @app.route("/logout")
@@ -201,7 +201,7 @@ def get_image(filename):
 
 
 
-#------------------------------------- code for extracting details from cards and saving to database ----------------------------------------
+#------------------------------------ code for extracting details from cards and saving to database --------------------------------------
 
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -295,14 +295,22 @@ def aadhaar_details():
         full_name = request.form.get("full_name")
         dob = request.form.get("dob")
         gender = request.form.get("gender")
+        father_name = request.form.get("father_name")
+        card = request.form.get("card")
+        issue_date = request.form.get("issue_date")
+        purpose = request.form.get("purpose")
 
         db.aadhaar_card_details.insert_one({
             "aadhaar_number": aadhaar_number,
             "full_name":full_name, 
             "dob":dob, 
-            "gender": gender
+            "gender": gender,
+            "father_name": father_name,
+            "card": card,
+            "issue_date": issue_date,
+            "purpose": purpose,
         })
-        return redirect(url_for("security_dashboard"))
+        return redirect(url_for("home_dash"))
 
     return render_template("aadhaar_details.html", aadhaar=aadhaar_data)
 
@@ -326,16 +334,46 @@ def pan_details():
         full_name = request.form.get("full_name")
         father_name = request.form.get("father_name")
         dob = request.form.get("dob")
+        gender = request.form.get("gender")
+        card = request.form.get("Card")
+        issue_date = request.form.get("Issue_date")
+        purpose = request.form.get("Purpose")
 
         db.pan_card_details.insert_one({
             "pan_number": pan_number,
             "full_name": full_name,
             "father_name": father_name,
             "dob": dob,
+            "gender": gender,
+            "card": card,
+            "issue_date": issue_date,
+            "purpose": purpose,
         })
-        return redirect(url_for("aadhaar_details"))
+        return redirect(url_for("home_dash"))
     
     return render_template("pan_details.html", pan=pan_data)
+
+
+#------------------------------------------------ Dashboard Routes and logics -----------------------------------------------
+
+
+@app.route("/home_dash")
+@login_required
+def home_dash():
+    return render_template("home_dashboard.html")
+
+
+@app.route("/visitorOverview_dash")
+@login_required
+def visitorOverview_dash():
+    return render_template("visitorOverview_dashboard.html")
+
+
+@app.route("/userOverview_dash")
+@login_required
+def userOverview_dash():
+    return render_template("userOverview_dashboard.html")
+
 
 
 if __name__ == "__main__":

@@ -100,6 +100,7 @@
         <nav class="sidebar p-3" >
             <ul class="nav flex-column vh-20">
                 <li class="nav-item">
+<<<<<<< HEAD:templates/security.html
                   <a href="#" class="nav-link text-white"><i class="fa fa-home"></i><span> Home</span></a>
                 </li>
                 <li class="nav-item">
@@ -125,6 +126,20 @@
               </ul>
               
               </ul>
+=======
+                    <a href="{{ url_for('home_dash') }}" class="nav-link text-white"><i class="fa fa-home"></i><span>Home</span></a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="{{ url_for('visitorOverview_dash') }}" class="nav-link text-white"><i class="fa fa-address-book"></i> <span>Visitor Overview</span></a>
+                </li> -->
+                <li class="nav-item">
+                     <a href="{{ url_for('userOverview_dash') }}" class="nav-link text-white"><i class="fa fa-user"></i> <span>User Overview</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('camera') }}" class="nav-link text-white"><i class="fa fa-camera"></i> <span>Camera</span></a>
+               </li>
+            </ul>
+>>>>>>> 2c38ef5417005f5b0f51051ac4f66bee3d004f23:templates/home_dashboard.html
         </nav>
 
         <!-- Main Content -->
@@ -142,7 +157,7 @@
                                <button class="btn btn-warning">Refresh</button>
                             </li>&nbsp;&nbsp;&nbsp;&nbsp;
                             <li class="nav-item">
-                               <button class="btn btn-danger">Logout</button>
+                                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
                             </li>
                         </ul>
                     </div>
